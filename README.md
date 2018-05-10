@@ -17,4 +17,11 @@
 - 文件结构  
 ![avatar](https://github.com/MockingT/3D_Game-6/blob/master/pictures/struct.png)  
   - SceneController.cs文件用于加载初始状态和提供Level Up和Reset功能，控制呈现出来的游戏界面。  
-  - BaseAction.cs文件
+  - BaseAction.cs文件提供一些基础的动作，例如Patrol的静止，走动巡逻以及跑步追击等。  
+  - Object.cs文件则是Patrol的工厂类（和之前几次作业想法类似），用于管理多个巡逻兵的生成，储存和清除以及Level Up功能中的增加。  
+  - PatrolUI.cs则是具体实现每个巡逻兵的动作（上下左右循环行走，追击目标）等，继承了BaseAction.cs文件中的动作基类。  
+  - PublisherAndObservser.cs文件则是题目中要求的订阅发布模式的具体实现，提供了一个Publisher类以及接受发布的Observer接口。  
+  - ActorController.cs文件用于管理目标和目标Action的状态，实现具体的发布消息。当目标被碰到时，它会发布消息目标的死亡，这个时候游戏结束。当目标进入某个Patrol的范围内时，它发布消息通知patrol目标的进入，patrol在用Observer提供的接口接收到发布时，会改变自身状态。  
+  - ScoreRecorder.cs和UIController.cs文件功能较为简单，就是显示分数和提供失败的消息。  
+
+  
