@@ -24,3 +24,50 @@
   - ActorController.cs文件用于管理目标和目标Action的状态，实现具体的发布消息。当目标被碰到时，它会发布消息目标的死亡，这个时候游戏结束。当目标进入某个Patrol的范围内时，它发布消息通知patrol目标的进入，patrol在用Observer提供的接口接收到发布时，会改变自身状态。  
   - ScoreRecorder.cs和UIController.cs文件功能较为简单，就是显示分数和提供失败的消息。  
 - 部分关键代码（具体代码见code文件夹）：  
+  - 订阅与发布模式：创建一个Publisher类，由ActorController使用发布消息，而另外创建一个Observeser接口，里面接收发布的函数在PatrolUI和SceneController中具体实现，对应不同的接收到信息之后的反应。  
+  
+  
+        public interface Publish
+        {
+            void notify(ActorState state, int pos, GameObject actor);
+            void add(Observer observer);
+            void delete(Observer observer);
+        }
+
+        // implemented in SceneController.cs
+        public interface Observer
+        {
+            void notified(ActorState state, int pos, GameObject actor);
+            // receiver
+        }
+
+        public class Publisher : Publish {
+            private delegate void ActionUpdate(ActorState state, int pos, GameObject actor);
+            private ActionUpdate updatelist;
+
+            // instance
+            private static Publish _instance;
+            public static Publish getInstance()
+            {
+                if (_instance == null)
+                    _instance = new Publisher();
+                return _instance;
+            }
+
+            public void notify(ActorState state, int pos, GameObject actor)
+            {
+                // publish the notification
+                if (updatelist != null)
+                    updatelist(state, pos, actor);
+            }
+
+            public void add(Observer observer)
+            {
+                updatelist += observer.notified;
+            }
+
+            public void delete(Observer observer)
+            {
+                updatelist -= observer.notified;
+            }
+        }
