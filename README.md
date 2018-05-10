@@ -70,4 +70,68 @@
             {
                 updatelist -= observer.notified;
             }
-        }
+        }  
+          
+          
+   - Level Up功能：因为想增加以下游戏难度（虽然已经很难了），于是增加了一Level Up的按钮，点一下patrol就在相应的位置多一个，会同时巡逻，一起追杀目标，其实主要用到的还是初始化场景时候的创建patrol的方法（LoadResources），不过对第一轮和后面的进行了区分，避免创建不必要的东西（目标或者patrol）。  
+  
+          private void LoadResources()
+          {
+              // the original position
+              float[] posx = { -5, 7, -5, 5 };
+              float[] posz = { -5, -7, 5, 5 };
+              if(first_round == true)
+              {
+                  // the actor
+                  actor = Instantiate(Resources.Load("prefabs/Ami"), new Vector3(2, 0, -2), Quaternion.Euler(new Vector3(0, 180, 0))) as GameObject;
+                  ObjectFactory fac = Singleton<ObjectFactory>.Instance;
+                  // the patrols
+                  for (int i = 0; i < posx.Length; i++)
+                  {
+                      GameObject patrol = fac.setObjectOnPos(new Vector3(posx[i], 0, posz[i]), Quaternion.Euler(new Vector3(0, 180, 0)));
+                      patrol.name = "Patrol" + (i + 1);
+                  }
+              }
+              // higher level
+              else
+              {
+                  level++;
+                  for (int i = level-1; i < level; i++)
+                  {
+                      GameObject patrol = fac.setObjectOnPos(new Vector3(posx[i], 0, posz[i]), Quaternion.Euler(new Vector3(0, 180, 0)));
+                      patrol.name = "Patrol" + (i + 1);
+                  }
+              }
+              first_round = false;
+          }  
+          
+          
+    - Patrol不断地环绕循环：在PatrolUI继承的基础动作的类中的Update函数中回调调用下面这个函数  
+  
+          public void SSEventAction(SSAction source, SSActionEventType events = SSActionEventType.COMPLETED, int intParam = 0, string strParam = null, Object objParam = null)
+          {
+              currentState = currentState > ActionState.WALKBACK ? ActionState.IDLE : (ActionState)((int)currentState + 1);
+              switch (currentState)
+              {
+                  // go forward
+                  case ActionState.WALKFORWARD:
+                      walkForward();
+                      break;
+                  // go back
+                  case ActionState.WALKBACK:
+                      walkBack();
+                      break;
+                  // go left
+                  case ActionState.WALKLEFT:
+                      walkLeft();
+                      break;
+                  // go right
+                  case ActionState.WALKRIGHT:
+                      walkRight();
+                      break;
+                  // stay still
+                  default:
+                      idle();
+                      break;
+              }
+           }
